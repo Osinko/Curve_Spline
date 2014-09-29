@@ -19,8 +19,25 @@ public class LineInspector : Editor
 
 				Handles.color = Color.white;
 				Handles.DrawLine (p0, p1);						//ラインを表示
+
 				Handles.DoPositionHandle (p0, handleRotaiton);	//位置ハンドルを表示
 				Handles.DoPositionHandle (p1, handleRotaiton);
-		}
 
+				EditorGUI.BeginChangeCheck ();
+				p0 = Handles.DoPositionHandle (p0, handleRotaiton);				//p0にはハンドルの位置（つまりワールド座標がはいる）
+				if (EditorGUI.EndChangeCheck ()) {
+						Undo.RecordObject (line, "Move point");					//Undoにlineの状態を記録
+						EditorUtility.SetDirty (line);							//オブジェクトのパラメータを保存するフラグを立てます
+						line.p0 = handleTransform.InverseTransformPoint (p0);	//位置をワールド座標からローカル座標へ変換して代入している
+				}
+
+				EditorGUI.BeginChangeCheck ();
+				p1 = Handles.DoPositionHandle (p1, handleRotaiton);
+				if (EditorGUI.EndChangeCheck ()) {
+						Undo.RecordObject (line, "Move point");
+						EditorUtility.SetDirty (line);
+						line.p1 = handleTransform.InverseTransformPoint (p1);
+				}
+
+		}
 }
